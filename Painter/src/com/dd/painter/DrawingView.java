@@ -27,9 +27,7 @@ public class DrawingView extends View
 	
 	private final Matrix mMatrix = new Matrix();
 	private final Canvas mLayerCanvas = new Canvas();
-	
-	private Bitmap mInnerShape;
-	private Bitmap mOuterShape;
+
 	private Bitmap mLayerBitmap;
 	
 	private ArrayList<DrawOp> mDrawOps = new ArrayList<DrawOp>();
@@ -63,22 +61,6 @@ public class DrawingView extends View
 		mPaintEraser.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 		mPaintEraser.setMaskFilter(new BlurMaskFilter(getResources()
 			.getDisplayMetrics().density * 4, BlurMaskFilter.Blur.NORMAL));
-	}
-	
-	public void setShape(int inner, int outer)
-	{
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
-		setShape(BitmapFactory.decodeResource(getResources(), inner, options),
-			BitmapFactory.decodeResource(getResources(), outer, options));
-	}
-	
-	public void setShape(Bitmap inner, Bitmap outer)
-	{
-		mInnerShape = inner;
-		mOuterShape = outer;
-		requestLayout();
-		invalidate();
 	}
 	
 	public void setDrawingColor(int color)
@@ -133,12 +115,6 @@ public class DrawingView extends View
 		super.onSizeChanged(w, h, oldw, oldh);
 		mLayerBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 		mLayerCanvas.setBitmap(mLayerBitmap);
-		
-		if(mOuterShape != null){
-			int dx = (w - mOuterShape.getWidth()) / 2;
-			int dy = (h - mOuterShape.getHeight()) / 2;
-			mMatrix.setTranslate(dx, dy);
-		}
 	}
 	
 	@Override
@@ -173,12 +149,6 @@ public class DrawingView extends View
 			drawOp(mLayerCanvas, op);
 		}
 		drawOp(mLayerCanvas, mCurrentOp);
-		
-		// Mask the drawing to the inner surface area of the shape
-		mLayerCanvas.drawBitmap(mInnerShape, mMatrix, mPaintDstIn);
-		
-		// Draw orignal shape to view
-		canvas.drawBitmap(mOuterShape, mMatrix, null);
 		
 		// Draw masked image to view
 		canvas.drawBitmap(mLayerBitmap, 0, 0, null);
@@ -265,65 +235,4 @@ public class DrawingView extends View
 			PAINT, ERASE;
 		}
 	}
-	
-	/*
-	@Override
-	protected Parcelable onSaveInstanceState()
-	{
-		return new SavedState(super.onSaveInstanceState(), mBitmapDraw);
-	}
-	
-	@Override
-	protected void onRestoreInstanceState(Parcelable state)
-	{
-		SavedState savedState = (SavedState)state;
-		super.onRestoreInstanceState(savedState.getSuperState());
-		if(savedState.bitmap != null){
-			mBitmapDraw = savedState.bitmap;
-			mCanvasDraw = new Canvas(mBitmapDraw);
-			invalidate();
-		}
-	}
-	
-	
-	static class SavedState extends BaseSavedState
-	{
-		private Bitmap bitmap;
-		
-		
-		public SavedState(Parcelable superState, Bitmap bitmap)
-		{
-			super(superState);
-			this.bitmap = bitmap;
-		}
-		
-		public SavedState(Parcel source)
-		{
-			super(source);
-			bitmap = source.readParcelable(getClass().getClassLoader());
-		}
-		
-		@Override
-		public void writeToParcel(Parcel dest, int flags)
-		{
-			super.writeToParcel(dest, flags);
-			dest.writeParcelable(bitmap, flags);
-		}
-		
-		
-		public static final Parcelable.Creator<SavedState> 
-			CREATOR = new Parcelable.Creator<SavedState>()
-		{
-			public SavedState createFromParcel(Parcel in)
-			{
-				return new SavedState(in);
-			}
-			
-			public SavedState[] newArray(int size)
-			{
-				return new SavedState[size];
-			}
-		};
-	}
-	*/
 }

@@ -102,7 +102,7 @@ public class MainFragment extends Fragment {
 					public void onStartTrackingTouch(SeekBar seekBar) {
 					}
 				});
-		mBrushStroke.setProgress(30);
+		mBrushStroke.setProgress(30);//
 
 		mBrushPanel.getViewTreeObserver().addOnPreDrawListener(
 				new ViewTreeObserver.OnPreDrawListener() {
